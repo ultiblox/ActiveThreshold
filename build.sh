@@ -20,14 +20,12 @@ for example in "$EXAMPLES_PATH"/*; do
         echo "Compiling example: $example"
         arduino-cli compile --fqbn $BOARD_TYPE --libraries "$LIBRARY_PATH" "$example"
         
-        if [ $? -ne 0 ];nthen
+        if [ $? -ne 0 ]; then
             echo "Error: Compilation failed for $example"
             exit 1
-        else
-            echo "Compilation successful for $example"
         fi
     fi
 
- done
+done
 
  echo "All examples compiled successfully."
