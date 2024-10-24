@@ -33,6 +33,14 @@ public:
     ActiveThreshold& loadThresholdFromEEPROM();
     ActiveThreshold& saveThresholdToEEPROM();
 
+    ActiveThreshold& incrementThreshold();
+    ActiveThreshold& decrementThreshold();
+
+    int getThreshold() const;
+
+
+
+
 private:
     bool isValueActive(int value);
 };

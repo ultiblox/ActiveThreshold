@@ -67,3 +67,21 @@ ActiveThreshold& ActiveThreshold::saveThresholdToEEPROM() {
     EEPROM.put(THRESHOLD_FLAG_EEPROM_ADDR, flag);
     return *this;
 }
+
+ActiveThreshold& ActiveThreshold::incrementThreshold() {
+    _setThreshold++;
+    saveThresholdToEEPROM();
+    return *this;
+}
+
+ActiveThreshold& ActiveThreshold::decrementThreshold() {
+    _setThreshold--;
+    saveThresholdToEEPROM();
+    return *this;
+}
+
+int ActiveThreshold::getThreshold() const {
+    return _useSetThreshold ? _setThreshold : _defaultThreshold;
+}
+
+
