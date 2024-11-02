@@ -3,7 +3,7 @@ name: Build, Version, and Release
 on:
   push:
     branches:
-      - main  # Only trigger on main branch
+      - main  # Trigger on main branch
 
 permissions:
   contents: write  # Required for tagging and creating releases
@@ -43,16 +43,28 @@ jobs:
         # Increment version and tag it
         bash version-increment.sh
 
+    - name: Confirm Version from VERSION File
+      run: |
+        version=$(cat VERSION)
+        echo "Detected version from VERSION file: $version"
+
     - name: Create GitHub Release
       if: ${{ success() }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        version=$(grep -oP 'version=\K.*' library.properties)
+        version=$(cat VERSION)
         release_name="Release v$version"
         release_body="Automatic release for version v$version"
         
-        # Create a release on GitHub
+        # Verify if the tag exists on GitHub
+        tag_exists=$(git ls-remote --tags origin refs/tags/v$version)
+        if [ -z "$tag_exists" ]; then
+          echo "Tag v$version not found on GitHub. Exiting release creation."
+          exit 1
+        fi
+        
+        # Create the release if tag exists
         curl -X POST \
           -H "Authorization: token $GITHUB_TOKEN" \
           -H "Content-Type: application/json" \
