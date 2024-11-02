@@ -15,8 +15,8 @@ private:
     void (*_onActive)();
     void (*_onInactive)();
 
-    static const int THRESHOLD_EEPROM_ADDR = 0;
-    static const int THRESHOLD_FLAG_EEPROM_ADDR = 4;
+    static const int THRESHOLD_EEPROM_ADDR = 30;
+    static const int THRESHOLD_FLAG_EEPROM_ADDR = 34;
     static const int EEPROM_VALID_FLAG = 0xABCD;
 
 public:

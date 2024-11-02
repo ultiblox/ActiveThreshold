@@ -69,8 +69,15 @@ ActiveThreshold& ActiveThreshold::saveThresholdToEEPROM() {
 }
 
 ActiveThreshold& ActiveThreshold::incrementThreshold() {
+    // Serial.print("Previous threshold: ");
+    // Serial.println(_setThreshold);
+
     _setThreshold++;
     saveThresholdToEEPROM();
+
+    // Serial.print("New threshold: ");
+    // Serial.println(_setThreshold);
+    
     return *this;
 }
 
