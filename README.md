@@ -1,91 +1,177 @@
-# ActiveThreshold Library
+# UltiBlox ActiveThreshold Library
+
+*Automatically turn devices on or off when values cross a set threshold.*
+
+[UltiBlox on GitHub](https://github.com/UltiBlox/ActiveThreshold) | [UltiBlox Home](https://ultiblox.org)
 
 ## Overview
-The `ActiveThreshold` library provides an efficient way to manage threshold-based activation and deactivation for analog or digital signals, commonly used with sensors in embedded systems. It enables automatic triggering based on predefined thresholds, useful in projects where specific signal values should activate or deactivate functions. For example, it can automate alerts or control devices when temperature, light, or voltage levels cross critical values.
+
+The `ActiveThreshold` library helps you monitor values and trigger actions based on configurable thresholds, making it ideal for automating responses to sensor data or other input signals. With customizable activation modes and callback support, `ActiveThreshold` offers a straightforward way to implement threshold-based control in embedded systems. If no custom threshold is set, the **default threshold** is used, which can be particularly useful for initial testing or fallback scenarios.
 
 ## Features
-- **Custom Threshold Setting**: Set and modify a threshold value for activation based on specific conditions.
-- **Persistent Storage**: Save and load threshold values to/from EEPROM, ensuring they remain across power cycles.
-- **Active-High / Active-Low Modes**: Configure activation to occur when a signal crosses above (active-high) or below (active-low) the threshold.
-- **Callback Functions**: Trigger specific actions when entering or leaving the active state.
-- **Threshold Adjustment**: Increment or decrement threshold values dynamically, with changes saved in EEPROM.
 
-## Key Concepts
+- Set custom thresholds for activation.
+- Configure **Active-High** or **Active-Low** behavior.
+- Store thresholds persistently using EEPROM, with a default fallback.
+- Register callbacks for activation and deactivation events.
+- Increment or decrement thresholds with automatic EEPROM updates.
 
-- **Threshold Setting**: Defines the activation boundary, where values above or below it can trigger callbacks, depending on the configuration. Example: If the threshold is set to 600, the library can activate when a sensor value goes above or below 600 based on active-high or active-low mode.
+## Installation
 
-- **Active-High / Active-Low Mode**:
-  - **Active-High** mode: Activation occurs when the signal reaches or exceeds the threshold. This is useful for scenarios like detecting overheating where high temperatures activate a cooling system.
-  - **Active-Low** mode: Activation occurs when the signal falls below the threshold, useful for monitoring conditions like low battery levels.
+### Option 1: Arduino Library Manager Installation (Recommended)
 
-- **Persistent Storage with EEPROM**:
-  - Saves thresholds across device resets using EEPROM storage, which is non-volatile memory. This feature is beneficial for long-term applications where the threshold should be retained even after power cycles.
+1. Open the **Arduino IDE**.
+2. Go to **Tools > Manage Libraries**.
+3. Search for **UltiBlox ActiveThreshold** and click **Install**.
+4. Access example sketches under **File > Examples > UltiBlox ActiveThreshold**.
 
-## Methods
+### Option 2: Manual Installation (for Development and Customization)
 
-- `init()`: Initializes the threshold management with any specified configurations. **Note**: `init()` should be called after setting up all other configurations, to finalize the setup.
-- `setDefaultThreshold(int defaultThreshold)`: Sets a default threshold, applied if no custom threshold is set.
-- `setThreshold(int threshold)`: Configures a specific threshold, overriding the default.
-- `setActiveHigh(bool isActiveHigh)`: Configures activation behavior as active-high (true) or active-low (false).
-- `onActive(void (*callback)())`: Defines a callback function that triggers when activation occurs.
-- `onInactive(void (*callback)())`: Defines a callback function that triggers when deactivation occurs.
-- `evaluate(int value)`: Evaluates the given value against the current threshold and calls the appropriate callback if a state change occurs.
-- `loadThresholdFromEEPROM()`: Loads the threshold value saved in EEPROM.
-- `saveThresholdToEEPROM()`: Saves the current threshold value to EEPROM.
-- `incrementThreshold()`: Increases the threshold by one and saves the new value to EEPROM.
-- `decrementThreshold()`: Decreases the threshold by one and saves the new value to EEPROM.
-- `getThreshold()`: Returns the current active threshold value.
+1. **Clone the Repository**:
+   
+   ```bash
+   git clone git@github.com:UltiBlox/ActiveThreshold.git ~/workspace/ActiveThreshold
+   cd ~/workspace/ActiveThreshold
+   ```
+
+2. **Prepare the Environment**:
+   Run the `prepare.sh` script to set up dependencies:
+   
+   ```bash
+   bash prepare.sh
+   ```
+
+3. **Install the Library**:
+   
+   - **Copy Installation**:
+     
+     ```bash
+     bash install.sh
+     ```
+   - **Symlink Installation** (for active development):
+     
+     ```bash
+     bash install-symlink.sh
+     ```
+
+4. **Build Examples**:
+   Compile example sketches with:
+   
+   ```bash
+   bash build.sh
+   ```
+
+## Dependencies
+
+- **EEPROM Library**: Required for persistent storage of thresholds.
+- **Arduino Core Library**
 
 ## Usage Example
 
-Below is a sample setup to initialize the library, set a custom threshold, and define active/inactive callbacks to control an LED based on sensor input.
+Refer to the [ActiveThresholdExample.ino](examples/ActiveThresholdExample/ActiveThresholdExample.ino) file for a complete usage example demonstrating threshold-based activation and deactivation.
+
+## Methods
+
+### Initialize the Threshold System
 
 ```cpp
-#include "ActiveThreshold.h"
-
-ActiveThreshold threshold;
-
-void onThresholdActive() {
-    Serial.println("Threshold Active!");
-    digitalWrite(LED_BUILTIN, HIGH);  // Turn LED on
-}
-
-void onThresholdInactive() {
-    Serial.println("Threshold Inactive!");
-    digitalWrite(LED_BUILTIN, LOW);   // Turn LED off
-}
-
-void setup() {
-    Serial.begin(9600);
-    pinMode(LED_BUILTIN, OUTPUT);                      // Set up built-in LED
-    threshold.setDefaultThreshold(400)                 // Set default threshold
-             .setThreshold(600)                        // Set custom threshold
-             .setActiveHigh(true)                      // Configure as active-high
-             .onActive(onThresholdActive)              // Set activation callback
-             .onInactive(onThresholdInactive);         // Set deactivation callback
-
-    threshold.init();                                  // Initialize after configuration
-}
-
-void loop() {
-    int sensorValue = analogRead(A0);                  // Example sensor reading
-    threshold.evaluate(sensorValue);                   // Evaluate against threshold
-}
+init()
 ```
 
-### EEPROM Error Handling
-To ensure reliable EEPROM loading, check if a valid threshold was loaded. If not, you can use the default threshold:
+Initializes the threshold system.
+
+### Set the Default Threshold
 
 ```cpp
-threshold.loadThresholdFromEEPROM();
-if (threshold.getThreshold() == 0) {  
-    Serial.println("EEPROM load failed, using default threshold.");
-}
+setDefaultThreshold(int defaultThreshold)
 ```
 
-## Dependencies
-- **EEPROM Library**: Required for threshold persistence.
-- **Arduino Core Library**: Standard functions used across Arduino sketches.
+Sets a default threshold value for triggering activation if no custom threshold is set or stored in EEPROM. This fallback threshold ensures the system can operate without requiring a stored value.
+
+### Define a Custom Threshold
+
+```cpp
+setThreshold(int threshold)
+```
+
+Defines a custom threshold value.
+
+### Configure Active-High or Active-Low Behavior
+
+```cpp
+setActiveHigh(bool isActiveHigh)
+```
+
+Sets activation mode to **active-high** (`true`), activating when the value meets or exceeds the threshold, or **active-low** (`false`), activating when the value falls below the threshold.
+
+### Register Callback for Activation
+
+```cpp
+onActive(void (*callback)())
+```
+
+Registers a callback function to execute when the threshold becomes active.
+
+### Register Callback for Deactivation
+
+```cpp
+onInactive(void (*callback)())
+```
+
+Registers a callback function to execute when the threshold becomes inactive.
+
+### Evaluate the Input Value
+
+```cpp
+evaluate(int value)
+```
+
+Evaluates the input value against the threshold, monitoring for changes in the activation state and triggering the appropriate callback if a state change occurs.
+
+### Load Threshold from EEPROM
+
+```cpp
+loadThresholdFromEEPROM()
+```
+
+Loads the saved threshold from EEPROM, if available. If no threshold is stored, the default threshold will be used.
+
+### Save Threshold to EEPROM
+
+```cpp
+saveThresholdToEEPROM()
+```
+
+Saves the current threshold to EEPROM for persistence across power cycles.
+
+### Increase the Threshold Value
+
+```cpp
+incrementThreshold()
+```
+
+Increases the threshold value by one and updates the stored value in EEPROM.
+
+### Decrease the Threshold Value
+
+```cpp
+decrementThreshold()
+```
+
+Decreases the threshold value by one and updates the stored value in EEPROM.
+
+### Get the Current Threshold Value
+
+```cpp
+getThreshold() const
+```
+
+Returns the current active threshold value, whether it’s the default or a custom-set threshold.
+
+## Examples
+
+- **[ActiveThresholdExample.ino](examples/ActiveThresholdExample/ActiveThresholdExample.ino)**: Demonstrates how to set up and use the library to activate or deactivate a pin based on sensor input.
 
 ## License
+
 [This project is licensed under the UltiBlox License.](https://ultiblox.org/license)
