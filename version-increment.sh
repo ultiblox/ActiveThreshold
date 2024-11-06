@@ -76,4 +76,5 @@ git commit -m "Update library.properties to version $new_version"
 git tag "v${new_version}"
 git push origin "v${new_version}"
 
+git push origin main
 echo $new_version > VERSION
