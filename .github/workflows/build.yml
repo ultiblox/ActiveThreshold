@@ -44,7 +44,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        version=$(grep -oP 'version=\K.*' library.properties)
+        version=$(cat VERSION)
         release_name="Release v$version"
         release_body="Automatic release for version v$version"
         # Create the release
