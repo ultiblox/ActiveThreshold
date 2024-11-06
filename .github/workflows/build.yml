@@ -21,15 +21,9 @@ jobs:
         git config --global user.name "${{ github.actor }}"
         git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
-    - name: Install Arduino CLI
+    - name: Run Prepare Script for Environment Setup
       run: |
-        curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
-        sudo mv bin/arduino-cli /usr/local/bin/
-
-    - name: Install Arduino AVR Core
-      run: |
-        arduino-cli core update-index
-        arduino-cli core install arduino:avr
+        bash prepare.sh
 
     - name: Run Build Script
       run: |
@@ -40,31 +34,20 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        # Increment version and tag it
+        # Increment version, create and push a new tag
         bash version-increment.sh
+        # Push the new tag to GitHub
 
-    - name: Confirm Version from VERSION File
-      run: |
-        version=$(cat VERSION)
-        echo "Detected version from VERSION file: $version"
 
     - name: Create GitHub Release
       if: ${{ success() }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        version=$(cat VERSION)
+        version=$(grep -oP 'version=\K.*' library.properties)
         release_name="Release v$version"
         release_body="Automatic release for version v$version"
-        
-        # Verify if the tag exists on GitHub
-        tag_exists=$(git ls-remote --tags origin refs/tags/v$version)
-        if [ -z "$tag_exists" ]; then
-          echo "Tag v$version not found on GitHub. Exiting release creation."
-          exit 1
-        fi
-        
-        # Create the release if tag exists
+        # Create the release
         curl -X POST \
           -H "Authorization: token $GITHUB_TOKEN" \
           -H "Content-Type: application/json" \
