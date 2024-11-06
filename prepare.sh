@@ -24,3 +24,7 @@ fi
 
 # Verify the installation
 arduino-cli version
+
+# Ensure the required Arduino AVR core is installed
+arduino-cli core update-index
+arduino-cli core install arduino:avr
